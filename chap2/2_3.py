@@ -1,15 +1,18 @@
 import random
 
 grammar = {
-    'sentence': ('sentence', ['noun_phrase', 'verb_phrase']),
-    'noun_phrase': ('noun_phrase', ['article', 'noun']),
-    'verb_phrase': ('verb_phrase', ['verb', 'noun_phrase']),
-    'article': ('article', ['the', 'a']),
-    'noun': ('noun', ['man', 'ball', 'woman', 'table']),
-    'verb': ('verb', ['hit', 'saw', 'took', 'liked'])
+    'sentence': ('sentence', [['noun_phrase', 'verb_phrase']]),
+    'noun_phrase': ('noun_phrase', [['article', 'noun']]),
+    'verb_phrase': ('verb_phrase', [['verb', 'noun_phrase']]),
+    'article': ('article', [['the', 'a']]),
+    'noun': ('noun', [['man', 'ball', 'woman', 'table']]),
+    'verb': ('verb', [['hit', 'saw', 'took', 'liked']])
 }
 
 print grammar.items()
+
+def valid_items(a):
+    return [x for x in a if x]
 
 def rule_lhs(rule):
     return rule[0]
@@ -18,17 +21,19 @@ def rule_rhs(rule):
     return rule[1]
 
 def rewrites(category):
-    rhs = rule_rhs(grammar[category])
-    can_rewrite = any([(x in grammar) for x in rhs])
-    return can_rewrite, rhs
+    return rule_rhs(grammar[category])
 
 def generate(phrase):
-    can_rewrite, rewrite_rules = rewrites(phrase)
-    #print can_rewrite, rewrite_rules
-    if can_rewrite:
-        return ' '.join([(generate(x) if x in grammar else random.choice(x)) for x in rewrite_rules])
+    rewrite_rules = rewrites(phrase)
+    rule = random.choice(rewrite_rules)
+    #print 'rule:', rule
+
+    rewritable = any([(x in grammar) for x in rule])
+    #print rewritable
+    if rewritable:
+        return ' '.join(valid_items([(generate(x) if x in grammar else random.choice(x)) for x in rule]))
     else:
-        return random.choice(rewrite_rules)
+        return random.choice(rule)
 
 print generate('noun_phrase')
 print generate('verb_phrase')
